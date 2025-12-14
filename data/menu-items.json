@@ -1,0 +1,404 @@
+[
+  {
+    "item": 23,
+    "category": "Cold Espresso",
+    "subsection": "Espresso Favorites (Iced)",
+    "name_en": "Iced Mocha",
+    "name_ar": "آيسد موكا",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.75,
+      "medium": 2.0,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 24,
+    "category": "Cold Espresso",
+    "subsection": "Espresso Favorites (Iced)",
+    "name_en": "Iced Latte",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Iced Latte.jpg",
+    "name_ar": "آيسد لاتيه",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.5,
+      "medium": 1.65,
+      "large": 1.9
+    }
+  },
+  {
+    "item": 25,
+    "category": "Cold Coffee",
+    "subsection": "Cold Press Coffee",
+    "name_en": "Cold Press Iced Coffee",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Cold Press Iced Coffee.png",
+    "name_ar": "كولد برس آيسد كوفي",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.4,
+      "medium": 1.6,
+      "large": 1.8
+    }
+  },
+  {
+    "item": 26,
+    "category": "Cold Coffee",
+    "subsection": "Cold Press Coffee",
+    "name_en": "Cold Press Lemonade",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Cold Press Lemonade.webp",
+    "name_ar": "كولد برس ليمونادة",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.85,
+      "medium": 2.1,
+      "large": 2.3
+    }
+  },
+  {
+    "item": 27,
+    "category": "Cold Coffee",
+    "subsection": "Caribou Cooler (Blended Beverages)",
+    "name_en": "Caramel High Rise Cooler",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Caramel High Rise Cooler.jpg",
+    "name_ar": "كراميل هاي رايز كولر",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.85,
+      "medium": 2.1,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 28,
+    "category": "Cold Coffee",
+    "subsection": "Caribou Cooler (Blended Beverages)",
+    "name_en": "Campfire Mocha Cooler",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Campfire Mocha Cooler.jpeg",
+    "name_ar": "كامب فاير موكا كولر",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.9,
+      "medium": 2.1,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 29,
+    "category": "Cold Coffee",
+    "subsection": "Caribou Cooler (Blended Beverages)",
+    "name_en": "Turtle Mocha Cooler",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Turtle Mocha Cooler.jpg",
+    "name_ar": "ترتل موكا كولر",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.9,
+      "medium": 2.1,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 30,
+    "category": "Cold Coffee",
+    "subsection": "Caribou Cooler (Blended Beverages)",
+    "name_en": "Salted Caramel Budino Cooler",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Salted Caramel Budino Cooler.jpg",
+    "name_ar": "سولتد كراميل بودينو كولر",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.9,
+      "medium": 2.1,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 1,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Turtle Mocha",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Turtle Mocha.jpg",
+    "name_ar": "ترتل موكا",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.9,
+      "medium": 2.1,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 2,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Salted Caramel Budino",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Salted Caramel Budino.webp",
+    "name_ar": "سولتد كراميل بودينو",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.9,
+      "medium": 2.1,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 3,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Mocha",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Mocha.jpeg",
+    "name_ar": "موكا",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.75,
+      "medium": 2.0,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 4,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Latte",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Latte.webp",
+    "name_ar": "لاتيه",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.4,
+      "medium": 1.65,
+      "large": 1.9
+    }
+  },
+  {
+    "item": 5,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Spanish Latte",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Spanish latte.jpg",
+    "name_ar": "سبانيش لاتيه",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.85,
+      "medium": 2.1,
+      "large": 2.2
+    }
+  },
+  {
+    "item": 6,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Espresso Single",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Espresso Single.jpg",
+    "name_ar": "إسبريسو سنجل",
+    "currency": "KWD",
+    "sizes": {
+      "single": 1.1
+    }
+  },
+  {
+    "item": 7,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Espresso Double",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Espresso Double.jpg",
+    "name_ar": "إسبريسو دبل",
+    "currency": "KWD",
+    "sizes": {
+      "double": 1.3
+    }
+  },
+  {
+    "item": 8,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Espresso Triple",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Espresso Triple.jpg",
+    "name_ar": "إسبريسو تربل",
+    "currency": "KWD",
+    "sizes": {
+      "triple": 1.4
+    }
+  },
+  {
+    "item": 9,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Caramel High Rise",
+    "name_ar": "كراميل هاي رايز",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.9,
+      "medium": 2.1,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 10,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Campfire Mocha",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Campfire Mocha.webp",
+    "name_ar": "كامب فاير موكا",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.9,
+      "medium": 2.1,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 11,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Berry White Mocha",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Berry White Mocha.png",
+    "name_ar": "بيري وايت موكا",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.9,
+      "medium": 2.1,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 12,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Mint Condition Mocha",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Mint Condition Mocha.webp",
+    "name_ar": "منت كونديشن موكا",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.9,
+      "medium": 2.1,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 13,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Americano",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Americano.jpg",
+    "name_ar": "أمريكانو",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.25,
+      "medium": 1.5,
+      "large": 1.75
+    }
+  },
+  {
+    "item": 14,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Hot Chocolate",
+    "name_ar": "شوكولاتة ساخنة",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.7,
+      "medium": 1.95,
+      "large": 2.2
+    }
+  },
+  {
+    "item": 15,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Matcha Tea Latte",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Matcha Tea Latte.jpg",
+    "name_ar": "ماتشا تي لاتيه",
+    "currency": "KWD",
+    "sizes": {
+      "small": 2.0,
+      "medium": 2.15,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 16,
+    "category": "Hot Espresso & Coffee",
+    "subsection": "Espresso Favorites (Hot)",
+    "name_en": "Fresh Brewed - Coffee of the Day",
+    "name_ar": "قهوة اليوم",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.3,
+      "medium": 1.45,
+      "large": 1.65
+    }
+  },
+  {
+    "item": 17,
+    "category": "Cold Espresso",
+    "subsection": "Espresso Shakers",
+    "name_en": "Caramel Espresso Shaker",
+    "name_ar": "شيكر إسبرسو كراميل",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.6,
+      "large": 1.95
+    }
+  },
+  {
+    "item": 18,
+    "category": "Cold Espresso",
+    "subsection": "Espresso Shakers",
+    "name_en": "Vanilla Espresso Shaker",
+    "name_ar": "شيكر إسبرسو فانيلا",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.6,
+      "large": 1.95
+    }
+  },
+  {
+    "item": 19,
+    "category": "Cold Espresso",
+    "subsection": "Espresso Shakers",
+    "name_en": "White Chocolate Espresso Shaker",
+    "name_ar": "شيكر إسبرسو شوكولاتة بيضاء",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.9,
+      "large": 2.3
+    }
+  },
+  {
+    "item": 20,
+    "category": "Cold Espresso",
+    "subsection": "Espresso Favorites (Iced)",
+    "name_en": "Iced Caramel High Rise",
+    "name_ar": "آيسد كراميل هاي رايز",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.9,
+      "medium": 2.1,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 21,
+    "category": "Cold Espresso",
+    "subsection": "Espresso Favorites (Iced)",
+    "name_en": "Iced Turtle Mocha",
+    "image": "https://raw.githubusercontent.com/Ahmed-Saber-Mohammed/menu-images/main/Iced Turtle Mocha.jpg",
+    "name_ar": "آيسد ترتل موكا",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.9,
+      "medium": 2.1,
+      "large": 2.25
+    }
+  },
+  {
+    "item": 22,
+    "category": "Cold Espresso",
+    "subsection": "Espresso Favorites (Iced)",
+    "name_en": "Iced Campfire Mocha",
+    "name_ar": "آيسد كامب فاير موكا",
+    "currency": "KWD",
+    "sizes": {
+      "small": 1.9,
+      "medium": 2.1,
+      "large": 2.25
+    }
+  }
+]
