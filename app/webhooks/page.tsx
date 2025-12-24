@@ -7,6 +7,10 @@ interface WebhookData {
   headers: Record<string, string>
   body: any
   isNew?: boolean
+  parsed?: {
+    type: "recommendation" | "order"
+    data: any
+  }
 }
 
 const WebhookSection = ({
@@ -66,11 +70,24 @@ const WebhookSection = ({
 
               <div className="space-y-4">
                 <div>
-                  <h4 className="mb-2 text-sm font-semibold text-gray-700">Body</h4>
+                  <h4 className="mb-2 text-sm font-semibold text-gray-700">Original Webhook</h4>
                   <pre className="overflow-x-auto rounded-lg bg-gray-50 p-4 text-xs text-gray-800">
                     {JSON.stringify(webhook.body, null, 2)}
                   </pre>
                 </div>
+
+                {webhook.parsed && (
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold text-green-700 flex items-center gap-2">
+                      <span className="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
+                      Parsed & Modified Data
+                    </h4>
+                    <pre className="overflow-x-auto rounded-lg bg-green-50 border border-green-200 p-4 text-xs text-gray-800">
+                      {JSON.stringify(webhook.parsed.data, null, 2)}
+                    </pre>
+                  </div>
+                )}
+
                 <details className="cursor-pointer">
                   <summary className="text-sm font-semibold text-gray-700">Headers</summary>
                   <pre className="mt-2 overflow-x-auto rounded-lg bg-gray-50 p-4 text-xs text-gray-800">
@@ -144,7 +161,36 @@ export default function WebhooksPage() {
 
           const newWebhooks = data.recentWebhooks
             .slice(0, data.recentWebhooks.length - lastRecommendationCountRef.current)
-            .map((w: WebhookData) => ({ ...w, isNew: true }))
+            .map((w: WebhookData) => {
+              let parsedData = null
+
+              if (w.body?.items_ids) {
+                let itemIds: number[] = []
+                const itemsData = w.body.items_ids
+
+                if (typeof itemsData === "string") {
+                  itemIds = itemsData.split(",").map((id: string) => Number.parseInt(id.trim()))
+                } else if (Array.isArray(itemsData)) {
+                  itemIds = itemsData.map((id: any) => Number.parseInt(String(id)))
+                } else if (typeof itemsData === "number") {
+                  itemIds = [itemsData]
+                }
+
+                parsedData = {
+                  type: "recommendation" as const,
+                  data: {
+                    item_ids: itemIds,
+                    count: itemIds.length,
+                  },
+                }
+              }
+
+              return {
+                ...w,
+                isNew: true,
+                parsed: parsedData,
+              }
+            })
 
           setAllRecommendationWebhooks((prev) => [...newWebhooks, ...prev])
           lastRecommendationCountRef.current = data.recentWebhooks.length
@@ -165,7 +211,48 @@ export default function WebhooksPage() {
 
           const newWebhooks = data.recentWebhooks
             .slice(0, data.recentWebhooks.length - lastOrderCountRef.current)
-            .map((w: WebhookData) => ({ ...w, isNew: true }))
+            .map((w: WebhookData) => {
+              let parsedData = null
+              const body = w.body
+
+              try {
+                let orderData = null
+
+                if (body?.Final_order) {
+                  const parsed = JSON.parse(body.Final_order)
+                  orderData = parsed.order || parsed
+                } else if (body?.order) {
+                  orderData = body.order
+                } else if (body?.items && Array.isArray(body.items)) {
+                  orderData = body
+                }
+
+                if (orderData?.items && Array.isArray(orderData.items)) {
+                  const items = orderData.items.map((item: any) => ({
+                    item_id: item.item_id,
+                    size: item.size || null,
+                    quantity: item.quantity || 1,
+                  }))
+
+                  parsedData = {
+                    type: "order" as const,
+                    data: {
+                      items: items,
+                      item_count: items.length,
+                      total_quantity: items.reduce((sum: number, item: any) => sum + item.quantity, 0),
+                    },
+                  }
+                }
+              } catch (parseError) {
+                console.error("Error parsing order:", parseError)
+              }
+
+              return {
+                ...w,
+                isNew: true,
+                parsed: parsedData,
+              }
+            })
 
           setAllOrderWebhooks((prev) => [...newWebhooks, ...prev])
           lastOrderCountRef.current = data.recentWebhooks.length
