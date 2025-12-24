@@ -6,6 +6,7 @@ interface WebhookData {
   timestamp: string
   headers: Record<string, string>
   body: any
+  isNew?: boolean
 }
 
 const WebhookSection = ({
@@ -36,17 +37,31 @@ const WebhookSection = ({
           webhooks.map((webhook, index) => (
             <div
               key={`${webhook.timestamp}-${index}`}
-              className="rounded-lg border border-gray-200 bg-white p-6 shadow-md"
+              className={`rounded-lg border ${webhook.isNew ? "border-2 border-green-500 shadow-lg animate-pulse" : "border-gray-200"} bg-white p-6 shadow-md transition-all duration-500`}
             >
               <div className="mb-4 flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-500">
-                  {new Date(webhook.timestamp).toLocaleString()}
+                  {new Date(webhook.timestamp).toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })}
                 </span>
-                {webhook.body.event && (
-                  <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
-                    {webhook.body.event}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {webhook.isNew && (
+                    <span className="rounded-full bg-green-500 px-3 py-1 text-xs font-bold text-white uppercase animate-pulse">
+                      NEW
+                    </span>
+                  )}
+                  {webhook.body.event && (
+                    <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+                      {webhook.body.event}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -72,53 +87,51 @@ const WebhookSection = ({
 }
 
 export default function WebhooksPage() {
-  const [recommendationWebhooks, setRecommendationWebhooks] = useState<WebhookData[]>([])
-  const [orderWebhooks, setOrderWebhooks] = useState<WebhookData[]>([])
+  const [allRecommendationWebhooks, setAllRecommendationWebhooks] = useState<WebhookData[]>([])
+  const [allOrderWebhooks, setAllOrderWebhooks] = useState<WebhookData[]>([])
   const [pollingPhase, setPollingPhase] = useState<"recommendations" | "orders" | "stopped">("recommendations")
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const lastRecommendationCountRef = useRef(0)
+  const lastOrderCountRef = useRef(0)
 
   useEffect(() => {
-    const clearWebhookData = async () => {
-      try {
-        console.log("Webhooks page: Clearing webhook data on load")
-        await Promise.all([
-          fetch("/api/webhooks/recommendations", { method: "DELETE" }),
-          fetch("/api/webhooks/orders", { method: "DELETE" }),
-        ])
-        console.log("Webhooks page: Webhook data cleared")
-      } catch (error) {
-        console.error("Webhooks page: Error clearing webhook data:", error)
-      }
-    }
+    const savedRecommendations = localStorage.getItem("webhook_recommendations")
+    const savedOrders = localStorage.getItem("webhook_orders")
 
-    clearWebhookData()
+    if (savedRecommendations) {
+      setAllRecommendationWebhooks(JSON.parse(savedRecommendations))
+    }
+    if (savedOrders) {
+      setAllOrderWebhooks(JSON.parse(savedOrders))
+    }
   }, [])
 
   useEffect(() => {
-    if (pollingPhase === "stopped" && orderWebhooks.length > 0) {
-      console.log("Webhooks page: Order cycle complete, preparing for next cycle")
-
-      // Wait 20 seconds before resetting
-      const resetTimer = setTimeout(async () => {
-        console.log("Webhooks page: Resetting for new cycle")
-
-        // Clear webhook data on server
-        await Promise.all([
-          fetch("/api/webhooks/recommendations", { method: "DELETE" }),
-          fetch("/api/webhooks/orders", { method: "DELETE" }),
-        ])
-
-        // Reset local state
-        setRecommendationWebhooks([])
-        setOrderWebhooks([])
-        setPollingPhase("recommendations")
-
-        console.log("Webhooks page: Ready for new cycle")
-      }, 20000)
-
-      return () => clearTimeout(resetTimer)
+    if (allRecommendationWebhooks.length > 0) {
+      localStorage.setItem("webhook_recommendations", JSON.stringify(allRecommendationWebhooks))
     }
-  }, [pollingPhase, orderWebhooks.length])
+  }, [allRecommendationWebhooks])
+
+  useEffect(() => {
+    if (allOrderWebhooks.length > 0) {
+      localStorage.setItem("webhook_orders", JSON.stringify(allOrderWebhooks))
+    }
+  }, [allOrderWebhooks])
+
+  useEffect(() => {
+    if (pollingPhase === "stopped" && allOrderWebhooks.length > 0) {
+      console.log("Order cycle complete")
+
+      const removeNewBadgeTimer = setTimeout(() => {
+        setAllRecommendationWebhooks((prev) => prev.map((w) => ({ ...w, isNew: false })))
+        setAllOrderWebhooks((prev) => prev.map((w) => ({ ...w, isNew: false })))
+        setPollingPhase("recommendations")
+        console.log("Ready for new cycle")
+      }, 30000)
+
+      return () => clearTimeout(removeNewBadgeTimer)
+    }
+  }, [pollingPhase, allOrderWebhooks.length])
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -126,9 +139,15 @@ export default function WebhooksPage() {
         const response = await fetch("/api/webhooks/recommendations")
         const data = await response.json()
 
-        if (data.recentWebhooks && data.recentWebhooks.length > 0) {
+        if (data.recentWebhooks && data.recentWebhooks.length > lastRecommendationCountRef.current) {
           console.log("Recommendations received, switching to order polling")
-          setRecommendationWebhooks(data.recentWebhooks)
+
+          const newWebhooks = data.recentWebhooks
+            .slice(0, data.recentWebhooks.length - lastRecommendationCountRef.current)
+            .map((w: WebhookData) => ({ ...w, isNew: true }))
+
+          setAllRecommendationWebhooks((prev) => [...newWebhooks, ...prev])
+          lastRecommendationCountRef.current = data.recentWebhooks.length
           setPollingPhase("orders")
         }
       } catch (error) {
@@ -141,9 +160,15 @@ export default function WebhooksPage() {
         const response = await fetch("/api/webhooks/orders")
         const data = await response.json()
 
-        if (data.recentWebhooks && data.recentWebhooks.length > 0) {
+        if (data.recentWebhooks && data.recentWebhooks.length > lastOrderCountRef.current) {
           console.log("Orders received, stopping polling")
-          setOrderWebhooks(data.recentWebhooks)
+
+          const newWebhooks = data.recentWebhooks
+            .slice(0, data.recentWebhooks.length - lastOrderCountRef.current)
+            .map((w: WebhookData) => ({ ...w, isNew: true }))
+
+          setAllOrderWebhooks((prev) => [...newWebhooks, ...prev])
+          lastOrderCountRef.current = data.recentWebhooks.length
           setPollingPhase("stopped")
         }
       } catch (error) {
@@ -151,25 +176,22 @@ export default function WebhooksPage() {
       }
     }
 
-    // Clear any existing interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
     }
 
-    // Start polling based on current phase
     if (pollingPhase === "recommendations") {
       console.log("Starting recommendation polling")
-      fetchRecommendations() // Fetch immediately
+      fetchRecommendations()
       intervalRef.current = setInterval(fetchRecommendations, 2000)
     } else if (pollingPhase === "orders") {
       console.log("Starting order polling")
-      fetchOrders() // Fetch immediately
+      fetchOrders()
       intervalRef.current = setInterval(fetchOrders, 2000)
     } else {
       console.log("Polling stopped")
     }
 
-    // Cleanup interval on unmount or phase change
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
@@ -192,14 +214,29 @@ export default function WebhooksPage() {
               </span>
             </p>
           </div>
+          <button
+            onClick={() => {
+              if (confirm("Are you sure you want to clear all webhook logs?")) {
+                setAllRecommendationWebhooks([])
+                setAllOrderWebhooks([])
+                localStorage.removeItem("webhook_recommendations")
+                localStorage.removeItem("webhook_orders")
+                lastRecommendationCountRef.current = 0
+                lastOrderCountRef.current = 0
+              }
+            }}
+            className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 transition-colors"
+          >
+            Clear All Logs
+          </button>
         </div>
 
         <WebhookSection
           title="Recommendations"
-          webhooks={recommendationWebhooks}
+          webhooks={allRecommendationWebhooks}
           webhookUrl="/api/webhooks/recommendations"
         />
-        <WebhookSection title="Orders" webhooks={orderWebhooks} webhookUrl="/api/webhooks/orders" />
+        <WebhookSection title="Orders" webhooks={allOrderWebhooks} webhookUrl="/api/webhooks/orders" />
       </div>
     </div>
   )
