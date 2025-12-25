@@ -18,6 +18,13 @@ export default function Home() {
   const [pollingPhase, setPollingPhase] = useState<"recommendations" | "orders" | "stopped">("recommendations")
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
+  const [showPreviewMenu, setShowPreviewMenu] = useState(true)
+
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+  const [isAutoScrolling, setIsAutoScrolling] = useState(true)
+  const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const userInteractionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
   useEffect(() => {
     const clearWebhookData = async () => {
       try {
@@ -42,21 +49,20 @@ export default function Home() {
       const resetTimer = setTimeout(async () => {
         console.log("Main page: Resetting for new cycle")
 
-        // Clear webhook data on server
         await Promise.all([
           fetch("/api/webhooks/recommendations", { method: "DELETE" }),
           fetch("/api/webhooks/orders", { method: "DELETE" }),
         ])
 
-        // Reset local state
         setRecommendationItems([])
         setOrderItems([])
         setHasRecommendations(false)
         setHasOrder(false)
         setPollingPhase("recommendations")
+        setShowPreviewMenu(true)
 
         console.log("Main page: Ready for new cycle")
-      }, 20000)
+      }, 30000)
 
       return () => clearTimeout(resetTimer)
     }
@@ -76,19 +82,17 @@ export default function Home() {
             const itemsData = latestRecommendation.body.items_ids
 
             if (typeof itemsData === "string") {
-              // CSV string: "1,2,3"
               itemIds = itemsData.split(",").map((id: string) => Number.parseInt(id.trim()))
             } else if (Array.isArray(itemsData)) {
-              // Already an array
               itemIds = itemsData.map((id: any) => Number.parseInt(String(id)))
             } else if (typeof itemsData === "number") {
-              // Single number
               itemIds = [itemsData]
             }
 
             console.log("Main page: Parsed recommendation IDs:", itemIds)
             setRecommendationItems(itemIds)
             setHasRecommendations(true)
+            setShowPreviewMenu(false)
             setPollingPhase("orders")
           }
         }
@@ -111,20 +115,15 @@ export default function Home() {
           try {
             let orderData = null
 
-            // 1. Check for Final_order field (stringified JSON)
             if (body?.Final_order) {
               console.log("Main page: Found Final_order, parsing...")
               const parsed = JSON.parse(body.Final_order)
               console.log("Main page: Parsed Final_order:", JSON.stringify(parsed, null, 2))
               orderData = parsed.order || parsed
-            }
-            // 2. Check for order field (object)
-            else if (body?.order) {
+            } else if (body?.order) {
               console.log("Main page: Found order field")
               orderData = body.order
-            }
-            // 3. Check if body itself is the order (already contains items)
-            else if (body?.items && Array.isArray(body.items)) {
+            } else if (body?.items && Array.isArray(body.items)) {
               console.log("Main page: Body contains items directly")
               orderData = body
             }
@@ -180,6 +179,36 @@ export default function Home() {
     }
   }, [pollingPhase])
 
+  useEffect(() => {
+    if (!showPreviewMenu || !scrollContainerRef.current) return
+
+    const container = scrollContainerRef.current
+    let animationFrameId: number | null = null
+    const scrollSpeed = 1 // pixels per frame (increased from 0.2)
+
+    const smoothScroll = () => {
+      const maxScroll = container.scrollWidth - container.clientWidth
+      const currentScroll = container.scrollLeft
+
+      if (currentScroll >= maxScroll - 1) {
+        // Seamless loop back to start
+        container.scrollLeft = 0
+      } else {
+        container.scrollLeft += scrollSpeed
+      }
+
+      animationFrameId = requestAnimationFrame(smoothScroll)
+    }
+
+    animationFrameId = requestAnimationFrame(smoothScroll)
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId)
+      }
+    }
+  }, [showPreviewMenu])
+
   const getImageUrl = (imagePath?: string): string => {
     if (!imagePath) return "/coffee-cup.png"
     if (imagePath.startsWith("http")) return imagePath
@@ -195,15 +224,12 @@ export default function Home() {
 
         const itemIdStr = String(orderItem.item_id).toLowerCase().trim()
 
-        // Try numeric lookup first
         const numId = Number.parseInt(itemIdStr)
         if (!Number.isNaN(numId)) {
           menuItem = menuItems.find((item) => item.item === numId)
         }
 
-        // If not found, try to match by product name
         if (!menuItem) {
-          // Convert "Americano_ID" to "Americano" for matching
           const productName = itemIdStr.replace(/_id$|_ID$/, "")
           menuItem = menuItems.find(
             (item) =>
@@ -271,6 +297,8 @@ export default function Home() {
 
   const displayTitle = hasOrder ? "Your Order" : hasRecommendations ? "Recommended for You" : ""
 
+  const previewItems = menuItems // Show all 30 menu items instead of just 6
+
   return (
     <main className="relative min-h-screen overflow-hidden">
       <div className="fixed top-6 left-6 z-30">
@@ -281,7 +309,7 @@ export default function Home() {
         />
       </div>
 
-      {!hasRecommendations && !hasOrder ? (
+      {!hasRecommendations && !hasOrder && !showPreviewMenu ? (
         <div className="fixed inset-0 z-0">
           <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover">
             <source
@@ -293,72 +321,135 @@ export default function Home() {
       ) : (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 py-24 px-4">
           <div className="container mx-auto max-w-7xl">
-            <h2 className="text-3xl font-bold text-center mb-8 text-amber-900">{displayTitle}</h2>
+            <h2 className="text-3xl font-bold text-center mb-8 text-amber-900">
+              {displayTitle || "Exploring Our Menu"}
+            </h2>
 
             <div className="space-y-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {displayContent.map((item: any) => (
-                  <div
-                    key={`${item.item}-${item.selectedSize}`}
-                    className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-105"
-                  >
-                    <div className="relative h-64 w-full overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50">
-                      <img
-                        src={getImageUrl(item.image) || "/placeholder.svg"}
-                        alt={item.name_en}
-                        className="h-full w-full object-contain p-4"
-                        onError={(e) => {
-                          e.currentTarget.src = "/coffee-cup.png"
-                        }}
-                      />
-                      {item.quantity > 1 && (
-                        <div className="absolute top-2 right-2 bg-amber-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
-                          {item.quantity}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="p-4">
-                      <div className="mb-2">
-                        <h3 className="text-xl font-bold text-amber-900">{item.name_en}</h3>
-                        <p className="text-sm text-gray-500 font-arabic">{item.name_ar}</p>
+              {showPreviewMenu && !hasRecommendations && !hasOrder ? (
+                <div
+                  ref={scrollContainerRef}
+                  className="flex gap-4 overflow-x-auto scrollbar-hide pb-4"
+                  style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                >
+                  {previewItems.map((item, index) => (
+                    <div
+                      key={item.item}
+                      className="flex-shrink-0 w-72 sm:w-80 md:w-96 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden"
+                    >
+                      <div className="relative h-56 sm:h-64 md:h-72 w-full overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50">
+                        <img
+                          src={getImageUrl(item.image) || "/placeholder.svg"}
+                          alt={item.name_en}
+                          className="h-full w-full object-contain p-4"
+                          onError={(e) => {
+                            e.currentTarget.src = "/coffee-cup.png"
+                          }}
+                        />
                       </div>
 
-                      <div className="text-xs text-gray-500 mb-3">
-                        <span className="font-semibold">{item.category}</span>
-                        {item.subsection && (
-                          <>
-                            <span className="mx-1">•</span>
-                            <span>{item.subsection}</span>
-                          </>
+                      <div className="p-5">
+                        {/* Item Name in English and Arabic */}
+                        <div className="mb-3">
+                          <h3 className="text-xl font-bold text-amber-900 mb-1">{item.name_en}</h3>
+                          <p className="text-sm text-gray-600 font-arabic">{item.name_ar}</p>
+                        </div>
+
+                        {/* Category and Subsection */}
+                        <div className="mb-3 space-y-1">
+                          <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide">
+                            {item.category}
+                          </p>
+                          <p className="text-xs text-gray-500">{item.subsection}</p>
+                        </div>
+
+                        {/* Sizes and Prices */}
+                        <div className="border-t border-amber-100 pt-3 mt-3">
+                          <p className="text-xs font-semibold text-gray-700 mb-2">Available Sizes:</p>
+                          <div className="space-y-1">
+                            {Object.entries(item.sizes).map(([size, price]) => (
+                              <div key={size} className="flex justify-between items-center text-sm">
+                                <span className="capitalize text-gray-700 font-medium">{size}</span>
+                                <span className="font-bold text-amber-800">
+                                  {price.toFixed(3)} {item.currency}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                  {displayContent.map((item: any, index: number) => (
+                    <div
+                      key={`${item.item}-${item.selectedSize}`}
+                      className="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-105"
+                    >
+                      <div className="relative h-32 sm:h-48 md:h-64 w-full overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50">
+                        <img
+                          src={getImageUrl(item.image) || "/placeholder.svg"}
+                          alt={item.name_en}
+                          className="h-full w-full object-contain p-2 sm:p-4"
+                          onError={(e) => {
+                            e.currentTarget.src = "/coffee-cup.png"
+                          }}
+                        />
+                        {item.quantity > 1 && (
+                          <div className="absolute top-1 right-1 sm:top-2 sm:right-2 bg-amber-600 text-white rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center font-bold text-xs sm:text-sm">
+                            {item.quantity}
+                          </div>
                         )}
                       </div>
 
-                      {item.selectedSize ? (
-                        <div className="bg-amber-50 rounded-lg p-3">
-                          <div className="flex justify-between items-center">
-                            <span className="capitalize text-gray-700 font-medium">{item.selectedSize}</span>
-                            <span className="font-bold text-amber-700 text-lg">
-                              {item.sizes[item.selectedSize]} {item.currency}
-                            </span>
-                          </div>
+                      <div className="p-2 sm:p-4">
+                        <div className="mb-1 sm:mb-2">
+                          <h3 className="text-sm sm:text-lg md:text-xl font-bold text-amber-900 line-clamp-1">
+                            {item.name_en}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-gray-500 font-arabic line-clamp-1">{item.name_ar}</p>
                         </div>
-                      ) : (
-                        <div className="space-y-1">
-                          {Object.entries(item.sizes).map(([size, price]) => (
-                            <div key={size} className="flex justify-between items-center text-sm">
-                              <span className="capitalize text-gray-600">{size}</span>
-                              <span className="font-semibold text-amber-700">
-                                {price} {item.currency}
+
+                        <div className="text-[10px] sm:text-xs text-gray-500 mb-2 sm:mb-3">
+                          <span className="font-semibold">{item.category}</span>
+                          {item.subsection && (
+                            <>
+                              <span className="mx-1">•</span>
+                              <span className="hidden sm:inline">{item.subsection}</span>
+                            </>
+                          )}
+                        </div>
+
+                        {item.selectedSize ? (
+                          <div className="bg-amber-50 rounded-lg p-2 sm:p-3">
+                            <div className="flex justify-between items-center">
+                              <span className="capitalize text-gray-700 font-medium text-xs sm:text-sm">
+                                {item.selectedSize}
+                              </span>
+                              <span className="font-bold text-amber-700 text-sm sm:text-lg">
+                                {item.sizes[item.selectedSize]} {item.currency}
                               </span>
                             </div>
-                          ))}
-                        </div>
-                      )}
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            {Object.entries(item.sizes).map(([size, price]) => (
+                              <div key={size} className="flex justify-between items-center text-[10px] sm:text-sm">
+                                <span className="capitalize text-gray-600">{size}</span>
+                                <span className="font-semibold text-amber-700">
+                                  {price} {item.currency}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               {hasOrder && invoice && (
                 <div className="w-full">
