@@ -81,7 +81,9 @@ export default function Home() {
             let itemIds: number[] = []
             const itemsData = latestRecommendation.body.items_ids
 
-            if (typeof itemsData === "string") {
+            if (itemsData.items && Array.isArray(itemsData.items)) {
+              itemIds = itemsData.items.map((item: any) => Number.parseInt(String(item.item_id)))
+            } else if (typeof itemsData === "string") {
               itemIds = itemsData.split(",").map((id: string) => Number.parseInt(id.trim()))
             } else if (Array.isArray(itemsData)) {
               itemIds = itemsData.map((id: any) => Number.parseInt(String(id)))
